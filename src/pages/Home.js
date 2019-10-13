@@ -5,17 +5,22 @@ const Home = () =>{
 	const dispatch = useDispatch();
 	const {loginStatus} = useSelector(state => state.user,[])
 	const userInfo = useSelector(state => state.user,[])
-	const [user, setUser] = useState('')
+	
+	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
 	const handleUser = (e) =>{
-		setUser(e.target.value);
+		setUsername(e.target.value);
 	}
 	const handlePassword = (e) =>{
 		setPassword(e.target.value);
 	}
 	const handleClick = (e) =>{
 		e.preventDefault();
-		dispatch(userActions.login({user, password}));
+		//userActions.login({username:username, password: password})
+		dispatch(userActions.login({username, password}));
+	}
+	const handleInfo = () =>{
+		dispatch(userActions.getUsers());
 	}
 	return(
 		<div>
@@ -34,6 +39,10 @@ const Home = () =>{
 			{JSON.stringify(userInfo)}
 			<br/>
 			loginStatus : {loginStatus===true ? "ISLOGINNED" : "NOTLOGINED"}
+			
+			<div style={{marginTop:'30px'}}>
+				<button onClick={handleInfo}>getInfo</button>
+			</div>
 			
 		</div>
 	)

@@ -1,50 +1,57 @@
-import { all, fork, takeEvery, call, put, delay, spawn, takeLatest,take } from 'redux-saga/effects';
+import { all, fork, takeEvery, call, put, delay, spawn, takeLatest,take ,select} from 'redux-saga/effects';
 import * as api from 'apis';
 import * as actions from 'reducers/user'
-//import * as actions from '../reducers/user'
-// -> yield put({type:actions.LOG_IN_SUCCESS, payload:{data}, error})이런식으로 사용
-// handleAction으로 export 했었으면 yield put(actions.LOG_IN_SUCCESS(data)) 이렇게 하면 될듯
-// 아니면 import {LOG_IN_SUCCESS} from '../reducers/users'
 
-// LOGIN_REQUEST만 page쪽에서 사용하고 성공/실패 동작 로직을 state를 바라보고 판단하게 해야 한다.
-// saga내부에선 call을 쓰든 await을 쓰든 기다려야 하고...
+
+import createRequestSaga from 'lib/createRequestSaga';
+function* infoFlow(action){
+	const getUsersSaga = createRequestSaga(actions.GET_USERS, api.getUser)
+	yield takeLatest(actions.GET_USERS, getUsersSaga)
+}
 
 export default function* loginSaga(){
+	yield spawn(infoFlow);
 	yield spawn(handleLogin);
 	yield spawn(pageFlow);
 }
 //takeEvery for GET
 //takeLatest for POST, PUT, DELETE
 function* handleLogin(){
-	yield takeLatest(actions.LOGIN, loginFlow);
-	yield takeLatest(actions.LOGOUT, logoutFlow);
+	yield takeLatest(actions.LOGIN_REQUEST, loginFlow);
+	yield takeLatest(actions.LOGOUT_REQUEST, logoutFlow);
 }
 
 function* loginFlow(action){
-	const res = yield call(api.login, {user: action.payload.user, password: action.payload.password});
+	const res = yield call(api.login, {username: action.payload.username, password: action.payload.password});
+	console.log('res is ', res)
+	//select를 활용해 중간에 state확인 가능
+	// const prev =yield select(state => state.user);
 	if(res.data.loginStatus){
-		yield put(actions.success_login({user: action.payload.user, password: action.payload.password, history: action.payload.history}));
-		// action.payload.history.replace('/dashboard');
+		// yield put(actions.success_login({user: action.payload.user, password: action.payload.password, history: action.payload.history}));
+		yield put({type:actions.LOGIN_SUCCESS, payload: {username: action.payload.username, password: action.payload.password, history: action.payload.history}})
+		// const afters =yield select(state => state.user);
+	
 	}
 	else{
-		yield put(actions.failure_login());
+		// yield put(actions.failure_login());
+		yield put({type:actions.LOGIN_FAILURE})
 	}
 }
 function* logoutFlow(action){
-	yield put(actions.success_logout({history: action.payload.history}));
-	// action.payload.history.replace('/');
+	// yield put(actions.success_logout({history: action.payload.history}));
+	yield put({type:actions.LOGOUT_SUCCESS, payload:{history:action.payload.history}})
 }
 
 function* pageFlow(){
 	while(true){
-		yield take(actions.SUCCESS_LOGIN);
+		yield take(actions.LOGIN_SUCCESS);
 		//'history' context may be different...so not working
 		// yield put(replace('/dashboard'));
 		// suc.payload.history.replace('/dashboard');
 		
 		//destroy token or something
 		
-		yield take(actions.SUCCESS_LOGOUT);
+		yield take(actions.LOGOUT_SUCCESS);
 		// yield put(push('/'));
 		// out.payload.history.replace('/');
 	}
