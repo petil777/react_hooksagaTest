@@ -4,9 +4,10 @@ import * as actions from 'reducers/loading';
 
 //https://stackoverflow.com/questions/40402744/redux-saga-axios-and-progress-event
 export default function createRequestSaga(actionType, requestApi){
-	
-	const SUCCESS = `${actionType}_SUCCESS`;
-	const FAILURE = `${actionType}_FAILURE`;
+	//actionType : SOME_REQUEST
+	const actionPrefix = actionType.slice(0, -8);
+	const SUCCESS = `${actionPrefix}_SUCCESS`;
+	const FAILURE = `${actionPrefix}_FAILURE`;
 	
 	return function*(action){
 		let emit;
@@ -14,7 +15,7 @@ export default function createRequestSaga(actionType, requestApi){
 			emit = emitter;
 			return () => {}; 
 		});
-		yield fork(watchOnProgress, chan);
+		yield fork(watchOnProgress, chan, actionType);
 	
 		yield put({type:actions.START_LOADING, payload:actionType});
 		try{
@@ -31,10 +32,10 @@ export default function createRequestSaga(actionType, requestApi){
 }
 
 
-function* watchOnProgress(chan) {
+function* watchOnProgress(chan, actionType) {
   while (true) {
-    const data = yield take(chan);
-    yield put({ type: actions.IN_LOADING, payload: {progress: data} });
+    const progress = yield take(chan);
+    yield put({ type: actions.IN_LOADING, payload:{actionType, progress} });
   }
 }
 

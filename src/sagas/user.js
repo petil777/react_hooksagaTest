@@ -5,8 +5,9 @@ import * as actions from 'reducers/user'
 
 import createRequestSaga from 'lib/createRequestSaga';
 function* infoFlow(action){
-	const getUsersSaga = createRequestSaga(actions.GET_USERS, api.getUser)
-	yield takeLatest(actions.GET_USERS, getUsersSaga)
+	//TODO: have to add cancel logic here
+	const getUsersSaga = createRequestSaga(actions.GET_USERS_REQUEST, api.getUser)
+	yield takeLatest(actions.GET_USERS_REQUEST, getUsersSaga)
 }
 
 export default function* loginSaga(){
@@ -39,7 +40,7 @@ function* loginFlow(action){
 }
 function* logoutFlow(action){
 	// yield put(actions.success_logout({history: action.payload.history}));
-	yield put({type:actions.LOGOUT_SUCCESS, payload:{history:action.payload.history}})
+	yield put({type:actions.LOGOUT_SUCCESS})
 }
 
 function* pageFlow(){

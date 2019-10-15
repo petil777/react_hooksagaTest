@@ -1,11 +1,24 @@
 import React, {useState} from 'react';
-import {useSelector, useDispatch} from 'react-redux';
+import {shallowEqual, useSelector, useDispatch} from 'react-redux';
 import * as userActions from '../reducers/user';
+import _ from 'lodash';
 const Home = () =>{
+	const fn = (item, prevItem) =>{
+		//In this case, useSelector will not rendered again.
+		if(item.length === prevItem.length){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
 	const dispatch = useDispatch();
-	const {loginStatus} = useSelector(state => state.user,[])
-	const userInfo = useSelector(state => state.user,[])
-	
+	const {loginStatus} = useSelector(state => state.user,shallowEqual)
+	const userInfo = useSelector(state => state.user,fn);
+	const users = useSelector(state =>{
+		let u = state.user;
+		return u.users;
+	}, _.isEqual)
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
 	const handleUser = (e) =>{
@@ -14,10 +27,13 @@ const Home = () =>{
 	const handlePassword = (e) =>{
 		setPassword(e.target.value);
 	}
-	const handleClick = (e) =>{
+	const handleLogin = (e) =>{
 		e.preventDefault();
 		//userActions.login({username:username, password: password})
 		dispatch(userActions.login({username, password}));
+	}
+	const handleLogout = () =>{
+		dispatch(userActions.logout());
 	}
 	const handleInfo = () =>{
 		dispatch(userActions.getUsers());
@@ -33,9 +49,10 @@ const Home = () =>{
 					<input type="password" onChange = {handlePassword}/>
 				</div>
 				<div>
-					<button type="submit" onClick = {handleClick}>LOGIN</button>
+					<button type="submit" onClick = {handleLogin}>LOGIN</button>
 				</div>
 			</form>
+			<button onClick={handleLogout}>LogOut</button>
 			{JSON.stringify(userInfo)}
 			<br/>
 			loginStatus : {loginStatus===true ? "ISLOGINNED" : "NOTLOGINED"}
@@ -43,7 +60,8 @@ const Home = () =>{
 			<div style={{marginTop:'30px'}}>
 				<button onClick={handleInfo}>getInfo</button>
 			</div>
-			
+			<br/>
+			users : {JSON.stringify(users)}
 		</div>
 	)
 }

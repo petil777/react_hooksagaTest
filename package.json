@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.19.0",
+    "lodash": "^4.17.15",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "react-redux": "^7.1.1",
@@ -35,5 +36,5 @@
       "last 1 safari version"
     ]
   },
-	"proxy":"https://react-learning-back.run-us-west1.goorm.io"
+  "proxy": "https://react-learning-back.run-us-west1.goorm.io"
 }
